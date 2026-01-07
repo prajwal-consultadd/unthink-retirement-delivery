@@ -1,6 +1,7 @@
 from apify_client import ApifyClient
 import os
 from dotenv import load_dotenv
+import pandas as pd
 
 load_dotenv()
 
@@ -261,7 +262,7 @@ run_input = {
         }
     ],
     "deepScrape": True,
-    "limitPerSource": 20,
+    "limitPerSource": 5,
     "maxDelay": 8,
     "minDelay": 2,
     "proxy": {
@@ -285,23 +286,37 @@ run = client.actor("curious_coder/linkedin-post-search-scraper").call(run_input=
 dataset_id = run.get("defaultDatasetId")
 print(f"💾 Check your data at: https://console.apify.com/storage/datasets/{dataset_id}")
 
-# Iterate through the dataset
-print("\n📝 Posts:")
-for item in client.dataset(dataset_id).iterate_items():
-    post_url = item.get("postUrl")
-    text = item.get("text")
-    author = item.get("authorName")
-    profile = item.get("authorProfileUrl")
-    created_at = item.get("createdAt")
-    comments_count = item.get("commentsCount")
-    reactions_count = item.get("reactionsCount")
+# ---- Fetch ALL items from dataset ----
+items = list(client.dataset(dataset_id).iterate_items())
 
-    print("------")
-    print("Post URL:", post_url)
-    print("Author:", author)
-    print("Profile:", profile)
-    print("Created at:", created_at)
-    print("Text:", text[:200], "..." if len(text) > 200 else "")
-    print("Comments:", comments_count, "  Reactions:", reactions_count)
-    print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
-    print(item)
+if not items:
+    print("⚠️ Dataset is empty. Nothing to save.")
+    exit(0)
+
+# ---- Convert to DataFrame (keeps ALL fields) ----
+df = pd.DataFrame(items)
+
+# ---- Save to Excel ----
+output_file = f"linkedin_posts_{dataset_id}.xlsx"
+df.to_excel(output_file, index=False, engine="openpyxl")
+
+# Iterate through the dataset
+# print("\n📝 Posts:")
+# for item in client.dataset(dataset_id).iterate_items():
+#     post_url = item.get("postUrl")
+#     text = item.get("text")
+#     author = item.get("authorName")
+#     profile = item.get("authorProfileUrl")
+#     created_at = item.get("createdAt")
+#     comments_count = item.get("commentsCount")
+#     reactions_count = item.get("reactionsCount")
+
+#     print("------")
+#     print("Post URL:", post_url)
+#     print("Author:", author)
+#     print("Profile:", profile)
+#     print("Created at:", created_at)
+#     print("Text:", text[:200], "..." if len(text) > 200 else "")
+#     print("Comments:", comments_count, "  Reactions:", reactions_count)
+#     print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+#     print(item)
