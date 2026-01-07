@@ -1,0 +1,14 @@
+python-dotenv>=1.2
+pydantic>=2.12
+huggingface-hub>=0.33,<1.0
+langchain>=0.3
+langchain-core>=0.3
+langchain-community>=0.3
+langchain-text-splitters>=1.0
+langchain-huggingface>=1.0
+langchain_google_genai
+fastapi
+uvicorn
+python-multipart
+
+apify-client
