@@ -1,5 +1,6 @@
 from langchain_core.prompts import PromptTemplate
 from output_parser import POST_OUTPUT_PARSER
+from output_parser import COMMENT_OUTPUT_PARSER
 # from ragSystem.output_parser import POST_OUTPUT_PARSER
 
 POST_INTENT_PROMPT = PromptTemplate(
@@ -27,9 +28,12 @@ Post:
 
 COMMENT_INTENT_PROMPT = PromptTemplate(
     input_variables=["post_context", "post_text", "comment_text"],
+    partial_variables={
+        "format_instructions": COMMENT_OUTPUT_PARSER.get_format_instructions()
+    },
     template="""
 You are analyzing a LinkedIn COMMENT to identify whether
-the PERSON WHO COMMENTED shows interest in learning,
+the PERSON WHO COMMENTED shows personal interest in learning,
 improving, or planning finances/trading.
 
 Post context:
@@ -54,11 +58,6 @@ Also decide action:
 - NURTURE (early or vague interest)
 - DROP (no interest)
 
-Return JSON only:
-{
-  "intent": "...",
-  "confidence": 0.0-1.0,
-  "recommended_action": "CALL | NURTURE | DROP"
-}
+{format_instructions}
 """
 )
