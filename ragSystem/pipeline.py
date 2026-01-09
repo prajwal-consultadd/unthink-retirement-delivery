@@ -2,36 +2,47 @@ from post_intent import classify_post_intent as get_post_context
 from comment_intent import classify_comment_intent as get_comment_decision
 from scoring import compute_score
 
-CONFIDENCE_THRESHOLD = 0.6
-SCORE_THRESHOLD = 50
+CONFIDENCE_THRESHOLD = 0.55
+SCORE_THRESHOLD = 45
 
 
-def process_post(post_text: str, comments: list):
+def process_post(post: dict, comments: list[dict]):
     """
-    comments can be:
-    - list[str]
-    - OR list[{"text": "...", "profile_url": "..."}]
+    post = {
+        "post_id": "...",
+        "post_text": "...",
+        "post_url": "...",
+        "author_profile": "..."
+    }
+
+    comments = [
+        {
+            "post_id": "...",
+            "comment_text": "...",
+            "comment_url": "...",
+            "author": {
+                "first_name": "...",
+                "last_name": "...",
+                "public_id": "...",
+                "profile_url": "..."
+            }
+        }
+    ]
     """
 
-    # 1️⃣ Post context (Pydantic object)
-    post_ctx = get_post_context(post_text)
+    # 1️⃣ Post context
+    post_ctx = get_post_context(post["post_text"])
     post_context = post_ctx.post_context
 
     qualified_documents = []
 
     for c in comments:
-        # Normalize comment input
-        if isinstance(c, str):
-            comment_text = c
-            profile_url = None
-        else:
-            comment_text = c.get("text", "")
-            profile_url = c.get("profile_url")
+        comment_text = c["comment_text"]
 
-        # 2️⃣ Comment intent (Pydantic object)
+        # 2️⃣ Comment intent
         decision = get_comment_decision(
             post_context=post_context,
-            post_text=post_text,
+            post_text=post["post_text"],
             comment_text=comment_text
         )
 
@@ -52,46 +63,80 @@ def process_post(post_text: str, comments: list):
             continue
 
         qualified_documents.append({
-            "profile_url": profile_url,
-            "comment": comment_text,
+            "post_id": post["post_id"],
+            "post_url": post["post_url"],
+            "post_context": post_context,
+
+            "comment_url": c["comment_url"],
+            "comment_text": comment_text,
+
+            "author": c["author"],
+
             "intent": decision.intent,
             "confidence": decision.confidence,
-            "score": score,
-            "post_context": post_context
+            "score": score
         })
 
     return qualified_documents
 
-# post_text= """Most people stare at charts and hope.
-# Hope is not a strategy.
+post_1 = {
+    "post_id": "post_001",
+    "post_text": """
+Most traders fail not because of strategy, but because they don’t understand risk.
 
-# What actually works is understanding how global price movements behave, why certain hours matter more than others, and how risk quietly decides whether you survive or disappear.
+I spent years unlearning bad habits:
+- Overtrading
+- Random entries
+- Emotional exits
 
-# I’ve spent years breaking this down into a structured system:
+What finally worked was building a rules-based framework around risk, time, and liquidity.
 
-# How to read price without drowning in indicators
+This isn’t about signals or shortcuts.
+It’s about process.
 
-# How professionals think about entries, exits, and position sizing
+Comment “INFO” if you want to understand how professionals actually think.
+""",
+    "post_url": "https://linkedin.com/posts/post_001",
+    "author_profile": "https://linkedin.com/in/trading-coach"
+}
 
-# How to stop “feeling” the market and start executing rules
+comments_1 = [
+    {
+        "post_id": "post_001",
+        "comment_text": "I’ve been trading for almost a year and risk management is exactly where I keep messing up. This hit home.",
+        "comment_url": "https://linkedin.com/comment/001",
+        "author": {
+            "first_name": "Rahul",
+            "last_name": "Mehta",
+            "public_id": "rahul-mehta",
+            "profile_url": "https://linkedin.com/in/rahul-mehta"
+        }
+    },
+    {
+        "post_id": "post_001",
+        "comment_text": "Interesting perspective. Discipline really is underrated.",
+        "comment_url": "https://linkedin.com/comment/002",
+        "author": {
+            "first_name": "Ankit",
+            "last_name": "Sharma",
+            "public_id": "ankit-sharma",
+            "profile_url": "https://linkedin.com/in/ankit-sharma"
+        }
+    },
+    {
+        "post_id": "post_001",
+        "comment_text": "Is this something someone with a full-time job can realistically follow?",
+        "comment_url": "https://linkedin.com/comment/003",
+        "author": {
+            "first_name": "Neha",
+            "last_name": "Kapoor",
+            "public_id": "neha-kapoor",
+            "profile_url": "https://linkedin.com/in/neha-kapoor"
+        }
+    }
+]
 
-# This isn’t about hype, signals, or shortcuts.
-# It’s about building a repeatable decision-making process around liquid global markets.
 
-# If you want a skillset that rewards discipline, patience, and math over emotion and luck, this training was built for that.
+output= process_post(post_1, comments_1)
 
-# Comment “INFO” and I’ll send the details.
-
-# No promises of Lambos.
-# Just a framework that actually respects reality."""
-
-# comments= [
-#     "this sounds like a serious, process-driven approach. Would like to see how you structure risk and execution.",
-#     "Curious how this differs from the usual chart-pattern and indicator-heavy stuff people push here. What’s the edge?",
-#     "Interesting perspective. Discipline is definitely underrated."
-# ]
-
-# output= process_post(post_text, comments)
-
-# for o in output:
-#     print(o)
+print(output)
