@@ -5,6 +5,7 @@ import json
 
 from apify.postScraper import fetch_linkedin_posts_and_save_excel
 from ragSystem.pipeline import process_post
+from clay.linkedin import send_leads_linkedin_to_api
 
 
 OUTPUT_DIR = "outputs"
@@ -143,6 +144,21 @@ def run_pipeline():
     try:
         if os.path.exists(output_file):
             existing_df = pd.read_excel(output_file, engine="openpyxl")
+
+            # Existing public_ids
+            existing_public_ids = set(
+                existing_df["public_id"].dropna().astype(str)
+            )
+
+            # Keep only NEW public_ids
+            final_df = final_df[
+                ~final_df["public_id"].astype(str).isin(existing_public_ids)
+            ]
+
+            if final_df.empty:
+                print("⚠️ No new public_id found. Nothing to append.")
+                return
+
             combined_df = pd.concat([existing_df, final_df], ignore_index=True)
         else:
             combined_df = final_df
@@ -153,7 +169,6 @@ def run_pipeline():
         # Fallback: try writing final_df alone if anything goes wrong reading existing file
         final_df.to_excel(output_file, index=False, engine="openpyxl")
         print(f"✅ Pipeline complete. Saved final leads to {output_file} (fallback). Error: {e}")
-
 
 if __name__ == "__main__":
     run_pipeline()
