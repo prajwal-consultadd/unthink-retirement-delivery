@@ -169,6 +169,9 @@ def run_pipeline():
         # Fallback: try writing final_df alone if anything goes wrong reading existing file
         final_df.to_excel(output_file, index=False, engine="openpyxl")
         print(f"✅ Pipeline complete. Saved final leads to {output_file} (fallback). Error: {e}")
+        
+    # Running the below pipeline to fetch the user contact from the clay of the linkedin users.
+    send_leads_linkedin_to_api()
 
 if __name__ == "__main__":
     run_pipeline()
