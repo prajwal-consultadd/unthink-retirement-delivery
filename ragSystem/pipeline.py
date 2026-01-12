@@ -1,9 +1,9 @@
-from post_intent import classify_post_intent as get_post_context
-from comment_intent import classify_comment_intent as get_comment_decision
-from scoring import compute_score
+from ragSystem.post_intent import classify_post_intent as get_post_context
+from ragSystem.comment_intent import classify_comment_intent as get_comment_decision
+from ragSystem.scoring import compute_score
 
-CONFIDENCE_THRESHOLD = 0.55
-SCORE_THRESHOLD = 45
+CONFIDENCE_THRESHOLD = 0
+SCORE_THRESHOLD = 0
 
 
 def process_post(post: dict, comments: list[dict]):
@@ -24,7 +24,6 @@ def process_post(post: dict, comments: list[dict]):
                 "first_name": "...",
                 "last_name": "...",
                 "public_id": "...",
-                "profile_url": "..."
             }
         }
     ]
@@ -35,6 +34,7 @@ def process_post(post: dict, comments: list[dict]):
     post_context = post_ctx.post_context
 
     qualified_documents = []
+    print("Comments are \n", comments)
 
     for c in comments:
         comment_text = c["comment_text"]
@@ -68,6 +68,7 @@ def process_post(post: dict, comments: list[dict]):
             "post_context": post_context,
 
             "comment_url": c["comment_url"],
+            "public_id": c["author"]["public_id"],
             "comment_text": comment_text,
 
             "author": c["author"],
@@ -76,67 +77,5 @@ def process_post(post: dict, comments: list[dict]):
             "confidence": decision.confidence,
             "score": score
         })
-
+    # print("qualified_documents are \n", qualified_documents)
     return qualified_documents
-
-post_1 = {
-    "post_id": "post_001",
-    "post_text": """
-Most traders fail not because of strategy, but because they don’t understand risk.
-
-I spent years unlearning bad habits:
-- Overtrading
-- Random entries
-- Emotional exits
-
-What finally worked was building a rules-based framework around risk, time, and liquidity.
-
-This isn’t about signals or shortcuts.
-It’s about process.
-
-Comment “INFO” if you want to understand how professionals actually think.
-""",
-    "post_url": "https://linkedin.com/posts/post_001",
-    "author_profile": "https://linkedin.com/in/trading-coach"
-}
-
-comments_1 = [
-    {
-        "post_id": "post_001",
-        "comment_text": "I’ve been trading for almost a year and risk management is exactly where I keep messing up. This hit home.",
-        "comment_url": "https://linkedin.com/comment/001",
-        "author": {
-            "first_name": "Rahul",
-            "last_name": "Mehta",
-            "public_id": "rahul-mehta",
-            "profile_url": "https://linkedin.com/in/rahul-mehta"
-        }
-    },
-    {
-        "post_id": "post_001",
-        "comment_text": "Interesting perspective. Discipline really is underrated.",
-        "comment_url": "https://linkedin.com/comment/002",
-        "author": {
-            "first_name": "Ankit",
-            "last_name": "Sharma",
-            "public_id": "ankit-sharma",
-            "profile_url": "https://linkedin.com/in/ankit-sharma"
-        }
-    },
-    {
-        "post_id": "post_001",
-        "comment_text": "Is this something someone with a full-time job can realistically follow?",
-        "comment_url": "https://linkedin.com/comment/003",
-        "author": {
-            "first_name": "Neha",
-            "last_name": "Kapoor",
-            "public_id": "neha-kapoor",
-            "profile_url": "https://linkedin.com/in/neha-kapoor"
-        }
-    }
-]
-
-
-output= process_post(post_1, comments_1)
-
-print(output)
