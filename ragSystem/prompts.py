@@ -1,6 +1,5 @@
 from langchain_core.prompts import PromptTemplate
-from output_parser import POST_OUTPUT_PARSER
-from output_parser import COMMENT_OUTPUT_PARSER
+from ragSystem.output_parser import POST_OUTPUT_PARSER, COMMENT_OUTPUT_PARSER
 # from ragSystem.output_parser import POST_OUTPUT_PARSER
 
 POST_INTENT_PROMPT = PromptTemplate(
