@@ -64,4 +64,3 @@ class LinkedInPost(Base):
     image = Column(JSONB)
 
     updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
-
