@@ -3,23 +3,24 @@ import glob
 import pandas as pd
 import json
 
-from apify.postScraper import fetch_linkedin_posts_and_save_excel
+from apify.postScraper import fetch_linkedin_posts_and_save_db
 from ragSystem.pipeline import process_post
 from clay.linkedin import send_leads_linkedin_to_api
+from db.postgres import init_db
 
 
-OUTPUT_DIR = "outputs"
 FINAL_DIR = "potentialUsers"
 
 
 def run_pipeline():
+    # Initializing the database
+    init_db()
+    print("Database Initialized")
+    
     # The pipline responsible to fetch post from the apify
     print("🚀 Step 1: Running post scraper...")
-    fetch_linkedin_posts_and_save_excel()
-
-    if not os.path.exists(OUTPUT_DIR):
-        print("❌ outputs directory not found.")
-        return
+    fetch_linkedin_posts_and_save_db()
+    print("Post saved in the database")
 
     # The below pipeline is responsible for running the ragsystem and filtering the potential users
     excel_files = glob.glob(os.path.join(OUTPUT_DIR, "*.xlsx"))
