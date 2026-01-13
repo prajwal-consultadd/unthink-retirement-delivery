@@ -14,7 +14,7 @@ def run_pipeline():
 
     # 2️⃣ Fetch posts from Apify → DB
     print("🚀 Fetching LinkedIn posts...")
-    # fetch_linkedin_posts_and_save_db()
+    fetch_linkedin_posts_and_save_db()
     print("✅ Posts saved to DB")
 
     # 3️⃣ Process posts and getting the potential users
@@ -24,7 +24,7 @@ def run_pipeline():
     
 
     # 4️⃣ Send leads to Clay / calling system
-    # send_leads_linkedin_to_api()
+    send_leads_linkedin_to_api()
     print("✅ Lead pipeline completed")
 
 if __name__ == "__main__":

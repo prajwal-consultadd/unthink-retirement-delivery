@@ -5,8 +5,6 @@ from sqlalchemy.dialects.postgresql import JSONB
 class LinkedInPotentialUser(Base):
     __tablename__ = "linkedin_potential_users"
 
-    id = Column(Integer, primary_key=True, index=True)
-
     post_id = Column(String, index=True)
     post_url = Column(Text)
     post_context = Column(String)
@@ -20,7 +18,7 @@ class LinkedInPotentialUser(Base):
     confidence = Column(Float)
     score = Column(Integer)
 
-    public_id = Column(String, unique=True, index=True, nullable=False)
+    public_id = Column(String, unique=True, index=True, nullable=False, primary_key= True)
 
     phone_number = Column(String, nullable=True)
     email = Column(String, nullable=True)
