@@ -1,6 +1,6 @@
 from sqlalchemy.dialects.postgresql import insert
 from db.postgres import SessionLocal
-from db.models import LinkedInPost
+from db.models.linkedin_post_model import LinkedInPost
 
 
 def upsert_post(post: dict):
