@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Text
+from sqlalchemy import Column, Integer, String, Float, Text, Boolean
 from db.postgres import Base
 from sqlalchemy.dialects.postgresql import JSONB
 
@@ -22,3 +22,4 @@ class LinkedInPotentialUser(Base):
 
     phone_number = Column(String, nullable=True)
     email = Column(String, nullable=True)
+    soft_delete= Column(Boolean, default= False, nullable=False)
