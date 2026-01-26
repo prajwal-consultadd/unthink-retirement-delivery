@@ -1,29 +1,22 @@
 from sqlalchemy.dialects.postgresql import insert
-from db.postgres import SessionLocal
+from db.normalize_linkedin_post import normalize_linkedin_post
 from db.models.linkedin_post_model import LinkedInPost
+from db.postgres import SessionLocal
 
 
-def upsert_post(post: dict):
-    db = SessionLocal()
-
+def upsert_post(raw_post: dict):
+    session = SessionLocal()
     try:
-        stmt = insert(LinkedInPost).values(**post)
+        data = normalize_linkedin_post(raw_post)
 
+        stmt = insert(LinkedInPost).values(**data)
         stmt = stmt.on_conflict_do_update(
             index_elements=["urn"],
-            set_={
-                col: getattr(stmt.excluded, col)
-                for col in post.keys()
-                if col != "urn"
-            }
+            set_={k: getattr(stmt.excluded, k) for k in data if k != "urn"}
         )
 
-        db.execute(stmt)
-        db.commit()
-
-    except Exception as e:
-        db.rollback()
-        raise e
+        session.execute(stmt)
+        session.commit()
 
     finally:
-        db.close()
+        session.close()
