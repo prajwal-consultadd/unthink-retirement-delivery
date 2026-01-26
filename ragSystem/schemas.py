@@ -15,6 +15,10 @@ class PostIntentOutput(BaseModel):
         le=1.0,
         description="Confidence score between 0 and 1"
     )
+    
+    post_summary: str = Field(
+        description="1–2 sentence neutral summary of the post for downstream use"
+    )
 
 class CommentIntentOutput(BaseModel):
     intent: Literal[
@@ -23,7 +27,8 @@ class CommentIntentOutput(BaseModel):
         "RETIREMENT_PLANNING",
         "SIDE_INCOME",
         "SELLER",
-        "NOISE"
+        "NOISE",
+        "PASSIVE_INTEREST"
     ] = Field(description="Intent of the commenter")
 
     confidence: float = Field(
