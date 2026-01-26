@@ -26,7 +26,7 @@ Post:
 )
 
 COMMENT_INTENT_PROMPT = PromptTemplate(
-    input_variables=["post_context", "post_text", "comment_text"],
+    input_variables=["post_context", "post_summary", "comment_text"],
     partial_variables={
         "format_instructions": COMMENT_OUTPUT_PARSER.get_format_instructions()
     },
@@ -39,7 +39,7 @@ Post context:
 {post_context}
 
 Post:
-{post_text}
+{post_summary}
 
 Comment:
 {comment_text}
@@ -50,7 +50,9 @@ Classify comment intent into ONE:
 - RETIREMENT_PLANNING (long-term wealth, retirement focus)
 - SIDE_INCOME (extra income curiosity)
 - SELLER (promoting services, links, coaching)
-- NOISE (praise, emojis, generic reply)
+- PASSIVE_INTEREST (likes, praise, agreement, light engagement)
+- NOISE (spam, emojis only, irrelevant, broken input, unclear intent)
+
 
 Also decide action:
 - CALL (clear personal interest)

@@ -2,11 +2,12 @@ from apify_client import ApifyClient
 import os
 from dotenv import load_dotenv
 import pandas as pd
+from db.upsert import upsert_post
 
 load_dotenv()
 
 
-def fetch_linkedin_posts_and_save_excel():
+def fetch_linkedin_posts_and_save_db():
     """
     Runs Apify LinkedIn Post Search Scraper
     and saves ALL scraped fields to an Excel file.
@@ -267,7 +268,7 @@ def fetch_linkedin_posts_and_save_excel():
             }
     ],  # ⬅️ keep your full cookie list exactly as-is
         "deepScrape": True,
-        "limitPerSource": 5,
+        "limitPerSource": 1,
         "maxDelay": 8,
         "minDelay": 2,
         "proxy": {
@@ -306,25 +307,63 @@ def fetch_linkedin_posts_and_save_excel():
     ).call(run_input=run_input)
 
     dataset_id = run.get("defaultDatasetId")
-    print(f"💾 Dataset ID: {dataset_id}")
+    print(f"💾 Dataset ID:  {dataset_id}")
 
-    items = list(client.dataset(dataset_id).iterate_items())
+    for item in client.dataset(dataset_id).iterate_items():
+        post = {
+            "urn": item.get("urn"),
+            "text": item.get("text"),
+            "url": item.get("url"),
+            "posted_at_timestamp": item.get("postedAtTimestamp"),
+            "posted_at_iso": item.get("postedAtISO"),
+            "time_since_posted": item.get("timeSincePosted"),
+            "is_repost": item.get("isRepost"),
 
-    if not items:
-        print("⚠️ Dataset is empty. Nothing to save.")
-        return
+            "author_type": item.get("authorType"),
+            "author_profile_url": item.get("authorProfileUrl"),
+            "author_profile_id": item.get("authorProfileId"),
+            "author_headline": item.get("authorHeadline"),
+            "author_name": item.get("authorName"),
 
-    df = pd.DataFrame(items)
+            "type": item.get("type"),
+            "share_urn": item.get("shareUrn"),
 
-    output_dir = "outputs"
-    os.makedirs(output_dir, exist_ok=True)
+            "attributes": item.get("attributes"),
+            "comments": item.get("comments"),
+            "reactions": item.get("reactions"),
 
-    output_file = os.path.join(
-        output_dir,
-        f"linkedin_posts_{dataset_id}.xlsx"
-    )
+            "num_shares": item.get("numShares"),
+            "num_likes": item.get("numLikes"),
+            "num_comments": item.get("numComments"),
 
-    df.to_excel(output_file, index=False, engine="openpyxl")
+            "can_react": item.get("canReact"),
+            "can_post_comments": item.get("canPostComments"),
+            "can_share": item.get("canShare"),
+            "commenting_disabled": item.get("commentingDisabled"),
 
-    print(f"✅ Saved Excel to: {output_file}")
+            "allowed_commenters_scope": item.get("allowedCommentersScope"),
+            "root_share": item.get("rootShare"),
+            "share_audience": item.get("shareAudience"),
 
+            "author": item.get("author"),
+            "author_profile_picture": item.get("authorProfilePicture"),
+            "author_urn": item.get("authorUrn"),
+
+            "document": item.get("document"),
+            "is_activity": item.get("isActivity"),
+            "input_url": item.get("inputUrl"),
+            "linkedin_video": item.get("linkedinVideo"),
+            "author_followers_count": item.get("authorFollowersCount"),
+            "poll": item.get("poll"),
+            "article": item.get("article"),
+            "reshared_post": item.get("resharedPost"),
+            "activity_description": item.get("activityDescription"),
+            "images": item.get("images"),
+            "image": item.get("image"),
+        }
+
+        if post["urn"]:
+            upsert_post(post)
+            
+        print(f"Post id: {post["urn"]} saved in the linkedin_post table")
+    
