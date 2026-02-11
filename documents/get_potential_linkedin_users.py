@@ -41,7 +41,7 @@ def export_and_soft_delete_users():
                 "post_url": user.post_url,
                 "post_context": user.post_context,
                 "comment_url": user.comment_url,
-                "comment_text": user.comment_text,
+                # "comment_text": user.comment_text,
                 "author": user.author,
                 "intent": user.intent,
                 "confidence": user.confidence,
