@@ -2,7 +2,7 @@ from ragSystem.post_intent import classify_post_intent as get_post_context
 from ragSystem.comment_intent import classify_comment_intent as get_comment_decision
 from ragSystem.scoring import compute_score
 
-CONFIDENCE_THRESHOLD = 0
+CONFIDENCE_THRESHOLD = 0.50
 SCORE_THRESHOLD = 0
 
 
@@ -42,12 +42,13 @@ def process_post(post: dict, comments: list[dict]):
         # 2️⃣ Comment intent
         decision = get_comment_decision(
             post_context=post_context,
-            post_text=post["post_text"],
+            post_summary=post["post_summary"],
             comment_text=comment_text
         )
 
         # 3️⃣ Confidence gate
         if decision.confidence < CONFIDENCE_THRESHOLD:
+            print("Confidence of the user ", c["author"]["public_id"], " is ", decision.confidence)
             continue
 
         # 4️⃣ Score
@@ -60,6 +61,7 @@ def process_post(post: dict, comments: list[dict]):
 
         # 5️⃣ Score gate
         if score < SCORE_THRESHOLD:
+            print("Score of the user ", c["author"]["public_id"], " is ", score)
             continue
 
         qualified_documents.append({

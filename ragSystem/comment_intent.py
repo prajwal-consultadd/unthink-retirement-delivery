@@ -11,13 +11,13 @@ chain = COMMENT_INTENT_PROMPT | llm | COMMENT_OUTPUT_PARSER
 
 def classify_comment_intent(
     comment_text: str,
-    post_text: str,
+    post_summary: str,
     post_context: str
 ) -> CommentIntentOutput:
     try:
         commentIntentOutput= chain.invoke({
             "post_context": post_context,
-            "post_text": post_text,
+            "post_summary": post_summary,
             "comment_text": comment_text
         })
         print("commentIntentOutput", commentIntentOutput)
